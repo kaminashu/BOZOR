@@ -10,72 +10,61 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.d2android100.R
 import com.example.d2android100.domain.ShopItem
 
-class ShopListAdapter: ListAdapter<ShopItem, ShopListAdapter.VH>(ShopItemDiffCallback()) {
+class ShopListAdapter : ListAdapter<ShopItem, ShopListAdapter.VH>(ShopItemDiffCallback()) {
 
-    var onShopItemLongClickListener : ((ShopItem)-> Unit)? = null
-    var onShopItemClickListener:((ShopItem)->Unit)? = null
-    var count = 0
-    inner class VH(view: View) : RecyclerView.ViewHolder(view){
-        val count  = view.findViewById<TextView>(R.id.id1)
-        val name  = view.findViewById<TextView>(R.id.name)
+    var onShopItemLongClickListener: ((ShopItem) -> Unit)? = null
+    var onShopItemClickListener: ((ShopItem) -> Unit)? = null
+
+    inner class VH(view: View) : RecyclerView.ViewHolder(view) {
+        val count = view.findViewById<TextView>(R.id.id1)
+        val name = view.findViewById<TextView>(R.id.name)
+
+        fun bind(item: ShopItem, position: Int) {
+            name.text = "${item.name}"
+            count.text = item.count.toString()
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
 
-        var layout = when(viewType){
+        var layout = when (viewType) {
             ENABLED_VIEW -> R.layout.item_view_enabled
             DISABLED_VIEW -> R.layout.item_view_disabled
             else -> throw RuntimeException("Unkown viewType $viewType")
         }
-        val view = LayoutInflater.from(parent.context).inflate(layout,parent,false)
+        val view = LayoutInflater.from(parent.context).inflate(layout, parent, false)
         return VH(view)
     }
 
     override fun onBindViewHolder(holder: VH, position: Int) {
-        Log.d("ShopListAdapter", "onBindViewHolder: count: ${++count}")
-        val shopItem = getItem(position)
+        holder.bind(getItem(position), position)
 
-        holder.name.text = "${shopItem.name}"
-
-        holder.count.text = shopItem.count.toString()
-
-        holder.itemView.setOnLongClickListener{
-            onShopItemLongClickListener?.invoke(shopItem)
+        holder.itemView.setOnLongClickListener {
+            onShopItemLongClickListener?.invoke(getItem(position))
             true
         }
         holder.itemView.setOnClickListener {
-            onShopItemClickListener?.invoke(shopItem)
+            onShopItemClickListener?.invoke(getItem(position))
         }
-
 
     }
 
-//    override fun onViewRecycled(holder: VH) {
-//        holder.name.text = ""
-//        holder.count.text = ""
-//        holder.name.setTextColor(ContextCompat.getColor(holder.itemView.context,android.R.color.white))
-//        super.onViewRecycled(holder)
-//    }
-
     override fun getItemViewType(position: Int): Int {
-        val item = getItem(position)
+        return getItemType(position)
+    }
 
-        return if (item.enabled){
+    private fun getItemType(position: Int):Int {
+        return  if (getItem(position).enabled) {
             ENABLED_VIEW
-        }else{
+        } else {
             DISABLED_VIEW
         }
-}
-
-
-
-
+    }
 
 
     companion object {
         const val ENABLED_VIEW = 0
         const val DISABLED_VIEW = 1
-
         const val POOL_SIZE = 15
     }
 }

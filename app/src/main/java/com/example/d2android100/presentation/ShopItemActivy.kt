@@ -9,11 +9,11 @@ import com.example.d2android100.R
 import com.example.d2android100.databinding.ActivityShopItemActivyBinding
 import com.example.d2android100.domain.ShopItem
 
-class ShopItemActivy : AppCompatActivity(),ShopItemFragment.editListener {
+class ShopItemActivy : AppCompatActivity(), ShopItemFragment.editListener {
 
     lateinit var binding: ActivityShopItemActivyBinding
-    private var screenStatus= UNKOWN
-    private var shopItemId= -1
+    private var screenStatus = UNKOWN
+    private var shopItemId = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,56 +24,66 @@ class ShopItemActivy : AppCompatActivity(),ShopItemFragment.editListener {
         parseIntent()
         launchRightStatus()
     }
+
     private fun launchRightStatus() {
         val fragment = when (screenStatus) {
             EDIT -> ShopItemFragment.newIntanseItemEdit(shopItemId)
             ADD -> ShopItemFragment.newIntanseItemAdd()
             else -> throw RuntimeException("Qaysi statusli scrennligi topilmadi $screenStatus")
         }
-        supportFragmentManager.beginTransaction().add(R.id.container_id,fragment).commit()
-
+        supportFragmentManager.beginTransaction().add(R.id.container_id, fragment).commit()
     }
 
     private fun parseIntent() {
+        val status = intent.getStringExtra(STATUS)
+        screenStatus = status ?: throw java.lang.RuntimeException("Status null keldi")
+        hasExtraIntent()
+        errorStatus(status)
+        editStatus(status)
+    }
+
+    private fun hasExtraIntent() {
         if (!intent.hasExtra(STATUS)) {
             throw RuntimeException("parametrlar topilmadi")
         }
-        val status = intent.getStringExtra(STATUS)
+    }
+
+    private fun errorStatus(status: String?) {
         if (status != ADD && status != EDIT) {
             throw RuntimeException("Status xato $status")
         }
-        screenStatus = status
+    }
+
+    private fun editStatus(status: String?) {
         if (status == EDIT) {
             if (!intent.hasExtra(SHOP_ID)) {
                 throw RuntimeException("EDIT STATUSDA ID KELMADI")
             }
             shopItemId = intent.getIntExtra(SHOP_ID, -1)
-
         }
     }
 
+    //
+    companion object {
+        const val STATUS = "status"
+        const val ADD = "add"
+        const val EDIT = "edit"
+        const val SHOP_ID = "id"
+        const val UNKOWN = ""
 
-//
-        companion object {
-            const val STATUS = "status"
-            const val ADD = "add"
-            const val EDIT = "edit"
-            const val SHOP_ID = "id"
-            const val UNKOWN = ""
-
-            fun newIntentAddItem(context: Context): Intent {
-                val intent = Intent(context, ShopItemActivy::class.java)
-                intent.putExtra(STATUS, ADD)
-                return intent
-            }
-
-            fun newIntentEditItem(context: Context, id: Int): Intent {
-                val intent = Intent(context, ShopItemActivy::class.java)
-                intent.putExtra(STATUS, EDIT)
-                intent.putExtra(SHOP_ID, id)
-                return intent
-            }
+        fun newIntentAddItem(context: Context): Intent {
+            val intent = Intent(context, ShopItemActivy::class.java)
+            intent.putExtra(STATUS, ADD)
+            return intent
         }
+
+        fun newIntentEditItem(context: Context, id: Int): Intent {
+            val intent = Intent(context, ShopItemActivy::class.java)
+            intent.putExtra(STATUS, EDIT)
+            intent.putExtra(SHOP_ID, id)
+            return intent
+        }
+    }
 
     override fun onEditListenerFinished() {
         Toast.makeText(this@ShopItemActivy, "Success", Toast.LENGTH_SHORT).show()

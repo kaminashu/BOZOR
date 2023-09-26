@@ -43,21 +43,29 @@ class ShopItemViewModel(application: Application) : AndroidViewModel(application
     public fun addShopItem(inputName: String?, inputCount: String?) {
         val name = parseString(inputName)
         val count = parseCount(inputCount)
-        val validateInput = validateInput(name, count)
-        if (validateInput) {
-            val item = ShopItem(0,name, count, true)
+        _addShopItem(name, count)
+    }
+
+    private fun _addShopItem(name: String, count: Int) {
+        if (testNameCount(name, count)) {
+            val item = ShopItem(0, name, count, true)
             addShopItemUseCase.addShopItem(item)
             finishWork()
         }
     }
 
-
     public fun editShopItem(inputName: String?, inputCount: String?) {
         val name = parseString(inputName)
         val count = parseCount(inputCount)
-        val validateInput = validateInput(name, count)
-        if (validateInput) {
+        _editeShopItem(testNameCount(name, count), name, count)
+    }
 
+    private fun testNameCount(name: String, count: Int): Boolean {
+        return (validateInput(name, count))
+    }
+
+    private fun _editeShopItem(validateInput: Boolean, name: String, count: Int) {
+        if (validateInput) {
             _shopItem.value?.let {
                 val item = it.copy(name = name, count = count)
                 editShopItemUseCase.editShopItem(item)
@@ -86,17 +94,18 @@ class ShopItemViewModel(application: Application) : AndroidViewModel(application
     }
 
     private fun validateInput(name: String, count: Int): Boolean {
+        return _validateInput(name, count)
+    }
+
+    private fun _validateInput(name: String, count: Int): Boolean {
         var result = true
         if (name.isBlank()) {
             _errorInputName.value = true
             result = false
-        }
-        if (count <= 0) {
-            _errorInputCount.value = true
-            result = false
-        }
+        } else result = count > 0
         return result
     }
+
 
     public fun resetInputNameError() {
         _errorInputName.value = false

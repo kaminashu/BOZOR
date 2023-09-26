@@ -114,7 +114,6 @@ class ShopItemFragment(
     }
 
     private fun launchEditStatus() {
-
         viewModel.getShopById(shopItemID)
         viewModel.shopItem.observe(viewLifecycleOwner) {
             binding?.name?.setText(it.name.toString())
